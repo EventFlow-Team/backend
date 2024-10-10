@@ -69,7 +69,7 @@ const eventController = {
             const { eventId } = req.params;
 
             const stands = await standModel.find({ eventId });
-            if (stands.length === 0) return res.status(404).json({ msg: 'Nenhum stand encontrado para este evento' });
+            if (stands.length === 0) return res.status(404).json({ msg: 'Nenhum stand encontrado para este evento!!!!' });
 
             const totalRating = stands.reduce((acc, stand) => acc + stand.rating, 0);
             const averageRating = totalRating / stands.length;
