@@ -43,7 +43,7 @@ const eventController = {
         }
     },
 
-    events: async (req, res) => {
+    companyEvents: async (req, res) => {
         try {
             const companyId = req.company.id;
             const events = await eventModel.find({ companyId });
@@ -54,12 +54,21 @@ const eventController = {
         }
     },
 
+    events: async (req, res) => {
+        try {
+            const events = await eventModel.find();
+
+            res.status(200).json({ events });
+        } catch (error) {
+            res.status(500).json({ msg: error.message });
+        }
+    },
+
     eventRating: async (req, res) => {
         try {
             const { eventId } = req.params;
-            const companyId = req.company.id;
 
-            const stands = await standModel.find({ companyId, eventId });
+            const stands = await standModel.find({ eventId });
             if (stands.length === 0) return res.status(404).json({ msg: 'Nenhum stand encontrado para este evento' });
 
             const totalRating = stands.reduce((acc, stand) => acc + stand.rating, 0);
@@ -68,7 +77,7 @@ const eventController = {
             await eventModel.findByIdAndUpdate(eventId, { rating: averageRating });
 
             res.status(200).json({ msg: 'Rating do evento atualizado com sucesso', rating: averageRating });
-        } catch (error) { 
+        } catch (error) {
             res.status(500).json({ msg: error.message });
         }
     },

@@ -1,6 +1,5 @@
 const { User: userModel } = require('../models/User')
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const crypto = require('crypto')
 const mailer = require('../modules/mailer')
@@ -36,29 +35,6 @@ const userController = {
 
             const response = await userModel.create(newUser);
             res.status(201).json({ response, msg: "Usuário criado com sucesso!" });
-        } catch (error) {
-            res.status(500).json({ msg: error.message });
-        }
-    },
-
-    login: async (req, res) => {
-        try {
-            const { email, password } = req.body;
-
-            if (!email) return res.status(400).json({ msg: 'O email é obrigatório' });
-            if (!password) return res.status(400).json({ msg: 'A senha é obrigatória' });
-
-            const user = await userModel.findOne({ email });
-            if (!user) return res.status(404).json({ msg: "Usuário não encontrado" });
-
-            const checkPassword = await bcrypt.compare(password, user.password);
-            if (!checkPassword) return res.status(422).json({ msg: 'Senha inválida!' });
-
-            const secret = process.env.JWT_SECRET;
-            const token = jwt.sign({ id: user._id }, secret);
-            const id = user._id;
-
-            res.status(200).json({ msg: 'Autenticação realizada com sucesso!', id, token });
         } catch (error) {
             res.status(500).json({ msg: error.message });
         }
