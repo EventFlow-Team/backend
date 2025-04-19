@@ -27,7 +27,6 @@ const standSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    breakDate: [Date],
     finishDate: {
         type: Date,
         required: true
@@ -41,7 +40,7 @@ const standSchema = new mongoose.Schema({
         type: String,
         required:true
     },
-    rating: Number,
+    rating: [Number],
     giftDescription: [String],
     giftImage: [String],  
     buffetMenu: [String],

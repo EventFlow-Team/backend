@@ -26,7 +26,6 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    breakDate: [Date],
     finishDate: {
         type: Date,
         required: true

@@ -19,7 +19,7 @@ const eventController = {
             if (eventExists) return res.status(422).json({ msg: "Este evento já está cadastrado" });
 
             if (startDate > finishDate) return res.status(400).json({ msg: 'Data de início não pode ser maior que a data de término' });
-            if (breakDate < startDate || breakDate > finishDate) return res.status(400).json({ msg: 'Data de intervalo inválida' });
+            if (finishDate < startDate) return res.status(400).json({ msg: "Data de término não pode ser menor que a data de início" })
 
             const newEvent = {
                 companyId: companyId,
@@ -27,7 +27,6 @@ const eventController = {
                 name,
                 description,
                 startDate,
-                breakDate,
                 finishDate,
                 status,
                 location,
@@ -38,6 +37,16 @@ const eventController = {
 
             const response = await eventModel.create(newEvent);
             res.status(201).json({ response, msg: "Evento criado com sucesso!" });
+        } catch (error) {
+            res.status(500).json({ msg: error.message });
+        }
+    },
+
+    events: async (req, res) => {
+        try {
+            const events = await eventModel.find();
+
+            res.status(200).json({ events });
         } catch (error) {
             res.status(500).json({ msg: error.message });
         }
@@ -54,9 +63,10 @@ const eventController = {
         }
     },
 
-    events: async (req, res) => {
+    userEvents: async (req, res) => {
         try {
-            const events = await eventModel.find();
+            const userId = req.user.id;
+            const events = await eventModel.find({ userId });
 
             res.status(200).json({ events });
         } catch (error) {
@@ -64,23 +74,50 @@ const eventController = {
         }
     },
 
-    eventRating: async (req, res) => {
+    eventById: async (req, res) => {
         try {
-            const { eventId } = req.params;
+            const eventId = req.params.id;
+            const event = await eventModel.findById(eventId);
 
-            const stands = await standModel.find({ eventId });
-            if (stands.length === 0) return res.status(404).json({ msg: 'Nenhum stand encontrado para este evento!!!!' });
-
-            const totalRating = stands.reduce((acc, stand) => acc + stand.rating, 0);
-            const averageRating = totalRating / stands.length;
-
-            await eventModel.findByIdAndUpdate(eventId, { rating: averageRating });
-
-            res.status(200).json({ msg: 'Rating do evento atualizado com sucesso', rating: averageRating });
+            res.status(200).json({ event });
         } catch (error) {
             res.status(500).json({ msg: error.message });
         }
     },
+
+    addUser: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const eventId = req.params.id;
+
+            const userExists = await eventModel.findOne({ _id: eventId, userId: userId });
+            if(userExists) return res.status(422).json({ msg: 'Usuário já adicionado ao evento' });
+
+            const event = await eventModel.findByIdAndUpdate(eventId, { $push: { userId: userId } }, { new: true });
+            if(!event) return res.status(404).json({ msg: 'Evento não encontrado' });
+            
+            res.status(200).json({ msg: "Usuário adicionado com sucesso", event });
+        } catch (error) {
+            res.status(500).json({ msg: error.message });
+        }
+    },
+
+    removeUser : async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const eventId = req.params.id;
+
+            const userExists = await eventModel.findOne({ _id: eventId, userId: userId });
+            if(!userExists) return res.status(422).json({ msg: 'Usuário não encontrado no evento' });
+
+            const event = await eventModel.findByIdAndUpdate(eventId, { $pull: { userId: userId } }, { new: true });
+            if(!event) return res.status(404).json({ msg: 'Evento não encontrado' });
+
+            res.status(200).json({ msg: "Usuário removido com sucesso", event });
+        } catch (error) {
+            res.status(500).json({ msg: error.message });
+        }
+    }
 };
 
 module.exports = eventController;

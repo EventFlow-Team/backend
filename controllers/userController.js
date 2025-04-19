@@ -9,7 +9,7 @@ dotenv.config();
 const userController = {
     create: async (req, res) => {
         try {
-            const { name, surname, email, password, age, image } = req.body;
+            const { name, surname, email, password, age, image, phone } = req.body;
 
             if (!name) return res.status(400).json({ msg: 'Nome é obrigatório' });
             if (!surname) return res.status(400).json({ msg: 'Sobrenome é obrigatório' }); 
@@ -17,6 +17,7 @@ const userController = {
             if (!password) return res.status(400).json({ msg: 'Senha é obrigatória' });
             if (!age) return res.status(400).json({ msg: 'Idade é obrigatória' });
             if (!image) return res.status(400).json({ msg: 'Foto de perfil é o brigatória' }); 
+            if (!phone) return res.status(400).json({ msg: 'Telefone é obrigatório' });
 
             const userExists = await userModel.findOne({ email });
             if (userExists) return res.status(422).json({ msg: "Este email já está cadastrado" });
@@ -30,7 +31,8 @@ const userController = {
                 email,
                 password: hashedPassword,
                 age,
-                image
+                image,
+                phone
             };
 
             const response = await userModel.create(newUser);

@@ -1,23 +1,45 @@
 const mongoose = require('mongoose')
 
-const companySchema = new mongoose.Schema({
+const lineSchema = new mongoose.Schema({
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+        required: true
+    },
+    standId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Stand',
+        required: true
+    },
+    userId: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
     name: {
         type: String,
         required: true
     },
-    password: {
+    timeEstimate: {
+        type: Number,
+        required: true
+    },
+    group: {
+        type: Number,
+        required: true
+    },
+    steps: [{
+        type: String,
+        required: true
+    }],
+    status: {
         type: String,
         required: true
     },
-    image: {
-        type: String,
-        required: true
-    }
 }, { timestamps: true });
 
-const Company = mongoose.model('Company', companySchema)
+const Line = mongoose.model('Line', lineSchema)
 
 module.exports = {
-    Company,
-    companySchema,
+    Line,
+    lineSchema,
 };
