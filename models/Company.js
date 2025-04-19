@@ -12,6 +12,10 @@ const companySchema = new mongoose.Schema({
     image: {
         type: String,
         required: true
+    },
+    companyCode: {
+        type: String,
+        required: true
     }
 }, { timestamps: true });
 

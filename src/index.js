@@ -10,7 +10,7 @@ app.use(express.json())
 const connection = require('../db/conn')
 connection();
 
-const port = 3000
+const port = 4000
 
 app.get('/', (req, res) => {
     res.status(200).json({ msg: 'Bem vindo a API EventFlow' })

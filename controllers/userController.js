@@ -1,6 +1,5 @@
 const { User: userModel } = require('../models/User')
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const crypto = require('crypto')
 const mailer = require('../modules/mailer')
@@ -10,7 +9,7 @@ dotenv.config();
 const userController = {
     create: async (req, res) => {
         try {
-            const { name, surname, email, password, age, image } = req.body;
+            const { name, surname, email, password, age, image, phone } = req.body;
 
             if (!name) return res.status(400).json({ msg: 'Nome é obrigatório' });
             if (!surname) return res.status(400).json({ msg: 'Sobrenome é obrigatório' }); 
@@ -18,6 +17,7 @@ const userController = {
             if (!password) return res.status(400).json({ msg: 'Senha é obrigatória' });
             if (!age) return res.status(400).json({ msg: 'Idade é obrigatória' });
             if (!image) return res.status(400).json({ msg: 'Foto de perfil é o brigatória' }); 
+            if (!phone) return res.status(400).json({ msg: 'Telefone é obrigatório' });
 
             const userExists = await userModel.findOne({ email });
             if (userExists) return res.status(422).json({ msg: "Este email já está cadastrado" });
@@ -31,34 +31,12 @@ const userController = {
                 email,
                 password: hashedPassword,
                 age,
-                image
+                image,
+                phone
             };
 
             const response = await userModel.create(newUser);
             res.status(201).json({ response, msg: "Usuário criado com sucesso!" });
-        } catch (error) {
-            res.status(500).json({ msg: error.message });
-        }
-    },
-
-    login: async (req, res) => {
-        try {
-            const { email, password } = req.body;
-
-            if (!email) return res.status(400).json({ msg: 'O email é obrigatório' });
-            if (!password) return res.status(400).json({ msg: 'A senha é obrigatória' });
-
-            const user = await userModel.findOne({ email });
-            if (!user) return res.status(404).json({ msg: "Usuário não encontrado" });
-
-            const checkPassword = await bcrypt.compare(password, user.password);
-            if (!checkPassword) return res.status(422).json({ msg: 'Senha inválida!' });
-
-            const secret = process.env.JWT_SECRET;
-            const token = jwt.sign({ id: user._id }, secret);
-            const id = user._id;
-
-            res.status(200).json({ msg: 'Autenticação realizada com sucesso!', id, token });
         } catch (error) {
             res.status(500).json({ msg: error.message });
         }
